@@ -1,0 +1,238 @@
+# pyproject.toml - Modern Python packaging configuration
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "leda"
+version = "0.1.0"
+description = "LattIQ EDA - High-performance exploratory data analysis library"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "LattIQ Team", email = "contact@lattiq.com"}
+]
+maintainers = [
+    {name = "LattIQ Team", email = "contact@lattiq.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+keywords = ["eda", "data-analysis", "visualization", "profiling", "statistics"]
+requires-python = ">=3.8"
+
+# Core dependencies - minimal and justified
+dependencies = [
+    "pandas>=1.3.0",
+    "numpy>=1.20.0",
+    "plotly>=5.0.0",
+    "msgpack>=1.0.0",
+    "pydantic>=2.0.0",
+    "typing-extensions>=4.0.0",
+]
+
+[project.optional-dependencies]
+# Feature groups for optional functionality
+export = [
+    "weasyprint>=60.0",
+    "kaleido>=0.2.1",
+]
+json = [
+    "orjson>=3.8.0",
+]
+compression = [
+    "lz4>=4.0.0",
+    "zstandard>=0.20.0",
+]
+stats = [
+    "scipy>=1.7.0",
+    "statsmodels>=0.13.0",
+]
+text = [
+    "wordcloud>=1.9.0",
+    "textstat>=0.7.0",
+]
+performance = [
+    "polars>=0.19.0",
+    "numba>=0.57.0",
+]
+cloud = [
+    "boto3>=1.26.0",
+    "azure-storage-blob>=12.0.0",
+    "google-cloud-storage>=2.7.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-xdist>=3.0.0",
+    "pytest-benchmark>=4.0.0",
+    "hypothesis>=6.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "bandit>=1.7.0",
+    "safety>=2.0.0",
+    "pre-commit>=3.0.0",
+]
+docs = [
+    "sphinx>=6.0.0",
+    "sphinx-gallery>=0.11.0",
+    "nbsphinx>=0.8.0",
+    "myst-parser>=1.0.0",
+]
+all = [
+    "leda[export,json,compression,stats,text,performance,cloud]",
+]
+
+[project.urls]
+Homepage = "https://github.com/lattiq/leda"
+Documentation = "https://leda.readthedocs.io"
+Repository = "https://github.com/lattiq/leda"
+"Bug Tracker" = "https://github.com/lattiq/leda/issues"
+Changelog = "https://github.com/lattiq/leda/blob/main/CHANGELOG.md"
+
+[project.entry-points."leda.plugins"]
+# Plugin entry points for extensibility
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["leda*"]
+
+[tool.setuptools.package-data]
+leda = ["py.typed", "themes/*.json", "config/*.yaml"]
+
+# Development tools configuration
+[tool.black]
+line-length = 88
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # Exclude auto-generated files
+  \.eggs
+  | \.git
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+target-version = "py38"
+line-length = 88
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "ARG", # flake8-unused-arguments
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking
+    "PTH", # flake8-use-pathlib
+    "ERA", # eradicate
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008",  # do not perform function calls in argument defaults
+    "B905",  # `zip()` without an explicit `strict=` parameter
+]
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".tox",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]  # Allow unused imports in __init__.py
+"tests/**/*" = ["ARG", "S101"]  # Allow assert statements in tests
+
+[tool.mypy]
+python_version = "3.8"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "plotly.*",
+    "msgpack.*",
+    "weasyprint.*",
+    "kaleido.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=leda",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-fail-under=95",
+]
+testpaths = ["tests"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "visual: marks tests as visual regression tests",
+]
+
+[tool.coverage.run]
+source = ["leda"]
+omit = [
+    "tests/*",
+    "leda/_version.py",
+    "leda/plugins/*",  # Plugin system tested separately
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    "TYPE_CHECKING",
+]

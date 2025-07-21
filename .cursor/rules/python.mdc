@@ -1,0 +1,599 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+# Cursor AI Rules for EDA Library Development
+
+> You are an expert in Python library development, data visualization, and exploratory data analysis. Your role is to ensure the EDA library is well-designed, performant, user-friendly, and follows industry best practices for Python library development. Focus on creating a robust, extensible, and production-ready EDA library that can compete with tools like Sweetviz and AutoViz.
+
+## 1. Foundational Principles
+
+### Open Source Excellence Principles
+
+- **Community First**: Design APIs with community feedback and contribution in mind
+- **Radical Transparency**: Open development process with public roadmaps and discussions
+- **Inclusive Design**: Ensure accessibility for users with disabilities and diverse technical backgrounds
+- **Sustainability**: Build for long-term maintenance with clear governance model
+- **Interoperability**: Play well with existing PyData ecosystem tools
+- **Vendor Neutrality**: Avoid lock-in to specific platforms or services
+
+### Library Design Principles
+
+- **API Stability**: Semantic versioning with clear deprecation cycles (12+ months)
+- **Minimal Dependencies**: Carefully evaluate each dependency for maintenance burden
+- **Composability**: Unix philosophy - do one thing well, work with other tools
+- **Progressive Disclosure**: Simple 80% use case, expose power for 20% advanced usage
+- **Performance by Default**: Zero-config performance optimization for common operations
+- **Extensibility First**: Plugin architecture following established Python patterns
+
+### EDA-Specific Principles
+
+- **Comprehensive Coverage**: Support pandas, polars, dask, and other dataframe libraries
+- **Interactive by Default**: Web-first visualizations that work in Jupyter and standalone
+- **Output Flexibility**: HTML, PDF, JSON, images - let users choose their workflow
+- **Smart Inference**: Automatic analysis type detection with easy overrides
+- **Scale Gracefully**: Handle 1KB to 1GB+ datasets with appropriate strategies
+- **Universal Accessibility**: WCAG 2.1 compliant visualizations, screen reader friendly
+- **Cloud-Native Results**: Lightweight JSON serialization optimized for web delivery
+- **Storage Agnostic**: Results designed for S3, CDN, and browser consumption
+- **Memory Efficient**: Minimal memory footprint for large-scale deployments
+
+### Code Quality Principles
+
+- **Test-Driven Development**: Write tests first, especially for public APIs
+- **Type Safety**: Full mypy coverage with strict settings
+- **Documentation as Code**: Doctests in all examples, API docs auto-generated
+- **Defensive Programming**: Validate inputs, fail fast with helpful messages
+- **Configuration-Driven**: Pydantic schemas for all configuration
+- **Error Handling**: Exception hierarchy with specific, actionable error types
+
+## 2. Project Structure & Organization
+
+### Standard Library Structure
+
+```
+eda_analyzer/
+├── __init__.py                 # Package initialization and public API
+├── py.typed                   # PEP 561 type hint marker
+├── core/                      # Core EDA functionality
+│   ├── __init__.py
+│   ├── data_profiler.py      # Main profiler orchestrator
+│   ├── basic_stats.py        # Basic statistics (type, unique, missing, duplicates)
+│   ├── numerical_stats.py    # Comprehensive numerical analysis
+│   ├── categorical_stats.py  # Categorical data analysis
+│   ├── association_metrics.py # Cross-variable associations and correlations
+│   ├── missing_patterns.py   # Missing data pattern analysis
+│   ├── outlier_detection.py  # Outlier identification methods
+│   ├── data_quality.py       # Data quality assessment
+│   └── streaming_profiler.py # Memory-efficient streaming analysis
+├── visualizations/           # Visualization components
+│   ├── __init__.py
+│   ├── base.py              # Base visualization classes
+│   ├── distributions.py     # Distribution plots
+│   ├── correlations.py      # Correlation matrices and plots
+│   ├── categorical.py       # Categorical data visualizations
+│   ├── numerical.py         # Numerical data visualizations
+│   ├── temporal.py          # Time series visualizations
+│   └── text.py              # Text data visualizations
+├── reports/                 # Report generation
+│   ├── __init__.py
+│   ├── html_report.py       # HTML report generator
+│   ├── pdf_report.py        # PDF report generator
+│   ├── json_report.py       # Lightweight JSON serializer
+│   ├── json_schema.py       # JSON schema definitions
+│   └── templates/           # Jinja2 templates
+├── serializers/             # Data serialization for web delivery
+│   ├── __init__.py
+│   ├── base_serializer.py   # Base serialization interface
+│   ├── msgpack_serializer.py # MessagePack binary serialization
+│   ├── json_serializer.py   # JSON fallback serialization
+│   ├── format_negotiator.py # Content-type negotiation
+│   ├── compression.py       # Additional compression utilities
+│   └── streaming.py         # Streaming serialization for large results
+├── utils/                   # Utility functions
+│   ├── __init__.py
+│   ├── data_utils.py        # Data manipulation utilities
+│   ├── plot_utils.py        # Plotting utilities
+│   ├── color_utils.py       # Color palette management
+│   ├── io_utils.py          # Input/output utilities
+│   └── config_utils.py      # Configuration management
+├── plugins/                 # Plugin system
+│   ├── __init__.py
+│   ├── base_plugin.py       # Base plugin interface
+│   └── registry.py          # Plugin registry
+├── themes/                  # Visualization themes
+│   ├── __init__.py
+│   ├── default.py           # Default theme
+│   ├── dark.py              # Dark theme
+│   ├── accessible.py        # High contrast, colorblind-friendly
+│   └── minimal.py           # Clean, publication-ready theme
+├── config/                  # Configuration files
+│   ├── __init__.py
+│   ├── defaults.py          # Default configuration
+│   └── schemas.py           # Pydantic configuration schemas
+├── exceptions/              # Custom exceptions
+│   ├── __init__.py
+│   ├── data_exceptions.py   # Data-related exceptions
+│   └── visualization_exceptions.py  # Visualization exceptions
+└── _version.py              # Single source of truth for version
+```
+
+### OSS Project Files
+
+```
+project_root/
+├── .github/                 # GitHub-specific files
+│   ├── workflows/          # CI/CD workflows
+│   ├── ISSUE_TEMPLATE/     # Issue templates
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   ├── FUNDING.yml         # Sponsorship information
+│   └── SECURITY.md         # Security policy
+├── docs/                   # Documentation
+│   ├── source/            # Sphinx source files
+│   ├── examples/          # Example notebooks
+│   ├── tutorials/         # Step-by-step guides
+│   └── api/              # API reference
+├── tests/                  # Test suite
+├── benchmarks/            # Performance benchmarks
+├── CONTRIBUTING.md        # Contributor guidelines
+├── CODE_OF_CONDUCT.md    # Community standards
+├── LICENSE               # OSS license (MIT/Apache/BSD)
+├── CHANGELOG.md          # Version history
+├── SECURITY.md           # Security vulnerability reporting
+├── pyproject.toml        # Modern Python packaging
+├── requirements.txt      # Pinned dependencies
+├── requirements-dev.txt  # Development dependencies
+├── tox.ini              # Testing across environments
+├── .pre-commit-config.yaml # Pre-commit hooks
+├── .readthedocs.yaml    # ReadTheDocs configuration
+└── codecov.yml          # Code coverage configuration
+```
+
+### Package Management & Distribution
+
+- Follow PEP 517/518 for build system with pyproject.toml
+- Semantic versioning with single source of truth (\_version.py)
+- Support Python 3.8+ following NEP 29 (24-month support window)
+- Include py.typed file for PEP 561 type hint distribution
+- Wheel and source distribution on PyPI
+- Conda-forge package for conda ecosystem
+- Lock files for reproducible development environments
+
+### Community Standards
+
+- MIT or Apache 2.0 license for maximum adoption
+- Code of Conduct based on Contributor Covenant
+- Clear contributor guidelines with development setup
+- Issue and PR templates for structured feedback
+- Security policy with vulnerability disclosure process
+- Governance model for decision-making transparency
+
+### Configuration Architecture
+
+- Hierarchical configuration system (global → user → project → function level)
+- YAML/JSON configuration file support
+- Environment variable override support
+- Runtime configuration validation
+- Theme and styling configuration separation
+
+## 3. Core Library Architecture
+
+### Cloud-Native Data Architecture
+
+- **Binary-First Design**: MessagePack primary format with JSON fallback for compatibility
+- **Dual Serialization**: Both MessagePack (efficiency) and JSON (compatibility) support
+- **Streaming Support**: Large datasets processed and delivered in chunks
+- **Compression Strategy**: MessagePack's built-in efficiency + optional compression layers
+- **Schema Validation**: Unified schema definitions for both MessagePack and JSON outputs
+- **CDN Optimization**: Results optimized for edge cache and global delivery
+- **Browser Compatibility**: Automatic format negotiation based on client capabilities
+
+### Serialization Strategy
+
+- **MessagePack Primary**: Binary format for ~30% size reduction and faster parsing
+- **JSON Compatibility**: Automatic fallback for web browsers and legacy systems
+- **Content Negotiation**: HTTP Accept header support for format selection
+- **Hierarchical Results**: Nested structure with summary → details drill-down
+- **Data Sampling**: Intelligent sampling for large datasets with full data references
+- **Numeric Precision**: Configurable precision to balance accuracy vs. size
+- **Type Preservation**: Native binary types in MessagePack, JSON-compatible fallbacks
+- **Incremental Updates**: Support for partial result updates and streaming
+
+### Main Components
+
+- **DataProfiler**: Orchestrates comprehensive analysis across all data types
+- **BasicStatsAnalyzer**: Handles universal metrics (type, unique, missing, duplicates)
+- **NumericalAnalyzer**: Complete numerical distribution analysis
+- **CategoricalAnalyzer**: Categorical frequency and pattern analysis
+- **AssociationAnalyzer**: Cross-variable relationships and correlations
+- **StreamingProfiler**: Memory-efficient analysis for large datasets
+- **VisualizationEngine**: Plot generation with separable data/config layers
+- **SerializationEngine**: Lightweight MessagePack/JSON output with compression
+- **ReportGenerator**: Multi-format report assembly from analysis components
+- **ThemeManager**: CSS/JSON-based theming for consistent styling
+- **PluginSystem**: Extensible plugin architecture with serializable interfaces
+
+### Design Patterns
+
+- **Strategy Pattern**: Different analysis strategies for numerical, categorical, and mixed data types
+- **Factory Pattern**: Create appropriate analyzers based on column data types and content
+- **Observer Pattern**: Progress tracking with streaming result updates and callbacks
+- **Composite Pattern**: Combine multiple analysis components into comprehensive profiles
+- **Template Method**: Consistent analysis workflow with customizable steps
+- **Adapter Pattern**: Convert between internal objects and MessagePack/JSON representations
+- **Builder Pattern**: Construct complex analysis results incrementally
+- **Facade Pattern**: Simple interface hiding complex multi-analyzer orchestration
+
+### API Design
+
+- **Composable Analysis**: Mix and match specific analyzers for custom workflows
+- **Streaming Interface**: Progressive analysis with yield-based result streaming
+- **Type-Aware Processing**: Automatic analyzer selection based on data types
+- **Configurable Depth**: Choose analysis depth from basic to comprehensive
+- **Lazy Evaluation**: Compute expensive metrics only when requested
+- **Resource-Oriented**: RESTful structure with clear analysis resource hierarchy
+- **Pagination Support**: Built-in support for paginated large results
+- **Filtering Capabilities**: Result structure supports client-side filtering
+- **Caching Strategy**: Intelligent caching of expensive statistical computations
+- **Version Compatibility**: Analysis schema versioning for backward compatibility
+
+## 4. Visualization & Serialization Strategy
+
+### Binary-First Serialization Architecture
+
+- **MessagePack Primary**: ~30% smaller payloads with faster parsing than JSON
+- **JSON Fallback**: Automatic conversion for browser compatibility
+- **Content Negotiation**: HTTP Accept headers determine optimal format
+- **Type Safety**: MessagePack preserves numpy dtypes and Python types natively
+- **Streaming Protocol**: Binary streaming for real-time analysis updates
+- **Cross-Language**: MessagePack support across Python, JavaScript, and other languages
+
+### Dual-Format Visualization Data
+
+- **Plotly.js Compatible**: Both formats work with frontend visualization libraries
+- **Binary Efficiency**: MessagePack for internal storage and API responses
+- **Web Compatibility**: JSON for direct browser consumption and debugging
+- **Automatic Conversion**: Transparent format switching based on client needs
+- **Schema Consistency**: Same data structure in both MessagePack and JSON
+- **Development-Friendly**: JSON for debugging, MessagePack for production
+
+### Data Optimization Techniques
+
+- **Native Binary Types**: MessagePack's efficient integer, float, and binary encoding
+- **String Deduplication**: Automatic string interning in MessagePack format
+- **Array Optimization**: Efficient encoding of large numerical arrays
+- **Sparse Data**: Optimized representation of missing/null values
+- **Delta Encoding**: Incremental updates for time series and streaming data
+- **Compression Layers**: Optional gzip/lz4 on top of MessagePack for extreme optimization
+
+### Storage & Delivery Strategy
+
+- **S3 Optimization**: MessagePack files with proper MIME types (application/msgpack)
+- **CDN Distribution**: Both formats cached at edge with content negotiation
+- **Bandwidth Savings**: 30-50% reduction in transfer sizes vs JSON
+- **Parse Performance**: 2-5x faster deserialization in client applications
+- **Mobile Friendly**: Reduced data usage for mobile and low-bandwidth scenarios
+- **Version Compatibility**: Forward/backward compatibility across MessagePack versions
+
+### Technology Stack
+
+- **Primary**: MessagePack with msgpack-python (C extension)
+- **Fallback**: orjson for high-performance JSON when needed
+- **Validation**: Unified schema validation for both formats
+- **Streaming**: MessagePack streaming with length prefixes
+- **Compression**: Built-in MessagePack efficiency + optional layers
+- **Web Integration**: Automatic content-type detection and conversion
+
+### Frontend Integration Patterns
+
+- **JavaScript**: msgpack5 or @msgpack/msgpack for browser consumption
+- **Python Clients**: Direct msgpack consumption with full type fidelity
+- **REST APIs**: Content-Type: application/msgpack with JSON alternatives
+- **WebSocket**: Binary MessagePack streaming for real-time dashboards
+- **Hybrid Approach**: MessagePack for data, JSON for configuration/metadata
+- **Progressive Enhancement**: JSON baseline with MessagePack optimization
+
+## 5. Testing Strategy
+
+### OSS Testing Standards
+
+- **Comprehensive Coverage**: >95% code coverage with meaningful tests
+- **Property-Based Testing**: Use Hypothesis for edge case discovery
+- **Mutation Testing**: Use mutmut to validate test quality
+- **Regression Testing**: Automated visual regression testing for plots
+- **Compatibility Matrix**: Test across Python versions, OS, and key dependencies
+- **Performance Testing**: Benchmark suite with regression detection
+- **Integration Testing**: Test with real-world datasets and workflows
+
+### Test Infrastructure
+
+- **pytest**: Primary testing framework with advanced fixtures
+- **tox**: Test across multiple Python versions and environments
+- **nox**: Session-based testing for complex scenarios
+- **pytest-cov**: Coverage reporting with branch coverage
+- **pytest-xdist**: Parallel test execution for faster CI
+- **pytest-benchmark**: Performance regression testing
+- **pytest-mock**: Comprehensive mocking capabilities
+
+### Test Categories
+
+- **Unit Tests**: Individual component isolation testing
+- **Integration Tests**: Component interaction and workflow testing
+- **Visual Tests**: Screenshot comparison and plot validation
+- **Performance Tests**: Memory usage, execution time, and scalability
+- **Compatibility Tests**: Multiple pandas/numpy/Python versions
+- **Security Tests**: Input validation and safe processing
+- **Accessibility Tests**: Screen reader compatibility and color contrast
+
+### Test Data Strategy
+
+- **Synthetic Datasets**: Programmatically generated test cases
+- **Edge Case Datasets**: Empty data, single values, extreme outliers, large datasets
+- **Real-World Datasets**: Public datasets covering various domains
+- **Privacy-Safe**: No sensitive or personally identifiable information
+- **Reproducible**: Seeded random generation for consistent results
+- **Comprehensive**: All data types, missing patterns, and encoding issues
+
+### CI/CD Pipeline
+
+- **GitHub Actions**: Primary CI/CD with matrix testing
+- **Pre-commit**: Code quality enforcement with hooks
+- **Dependabot**: Automated dependency updates
+- **CodeQL**: Security vulnerability scanning
+- **Codecov**: Coverage reporting with PR integration
+- **ReadTheDocs**: Automated documentation builds
+- **PyPI Publishing**: Automated releases on tag push
+
+## 6. Documentation Strategy
+
+### OSS Documentation Excellence
+
+- **ReadTheDocs Integration**: Professional hosting with version management
+- **Diátaxis Framework**: Tutorials, how-to guides, reference, explanation
+- **Interactive Examples**: Live Jupyter notebooks with Binder/Colab links
+- **API Reference**: Auto-generated from docstrings with cross-links
+- **Contributor Docs**: Developer setup, architecture, and contribution workflow
+- **Internationalization**: Multi-language support for global adoption
+
+### Documentation Standards
+
+- **NumPy Docstring Convention**: Consistent parameter and return documentation
+- **Type Annotations**: Full type hints with Union types for flexibility
+- **Doctests**: Executable examples in all public functions
+- **Examples Gallery**: Sphinx-Gallery with diverse use cases
+- **Performance Notes**: Document computational complexity and memory usage
+- **Migration Guides**: Clear upgrade paths between major versions
+
+### Documentation Tools & Workflow
+
+- **Sphinx**: Documentation generation with MyST for Markdown support
+- **nbsphinx**: Integration of Jupyter notebooks into documentation
+- **sphinx-gallery**: Automated example gallery generation
+- **linkcheck**: Automated link validation in documentation
+- **spell-checker**: Automated spelling and grammar checking
+- **docs-as-code**: Version control documentation with pull request reviews
+
+### Community Documentation
+
+- **Contributing Guide**: Clear steps from issue to merged PR
+- **Code of Conduct**: Welcoming and inclusive community standards
+- **Governance**: Decision-making process and maintainer responsibilities
+- **Changelog**: Keep a Changelog format with semantic versioning
+- **Security Policy**: Responsible disclosure and vulnerability handling
+- **Support Channels**: Clear guidance on where to get help
+
+## 7. Development Workflow
+
+### OSS Development Standards
+
+- **GitHub Flow**: Feature branches with pull request reviews
+- **Conventional Commits**: Structured commit messages for automated changelog
+- **Semantic Release**: Automated versioning and release notes
+- **All Contributors**: Recognition for all types of contributions
+- **Issue Triage**: Clear labeling and response time commitments
+- **Release Cadence**: Regular minor releases (monthly) with patch releases as needed
+
+### Code Quality Enforcement
+
+- **Black**: Uncompromising code formatting (line length: 88)
+- **isort**: Import sorting with black compatibility
+- **ruff**: Fast Python linter replacing flake8/pylint
+- **mypy**: Strict type checking with no-implicit-optional
+- **bandit**: Security vulnerability scanning
+- **safety**: Known security vulnerability checking in dependencies
+
+### Pre-commit Hooks & CI
+
+- **pre-commit**: Local and CI enforcement of code quality
+- **GitHub Actions**: Matrix testing across Python versions and OS
+- **Dependabot**: Automated dependency updates with security alerts
+- **CodeQL**: GitHub's semantic code analysis for security
+- **Renovate**: Alternative dependency management with smart scheduling
+- **All-Contributors Bot**: Automated contributor recognition
+
+### Release Management
+
+- **Changelog**: Keep a Changelog with unreleased section
+- **Version Bumping**: Automated with conventional commits
+- **Release Notes**: Auto-generated from commits with manual curation
+- **PyPI Publishing**: Trusted publishing with OpenID Connect
+- **GitHub Releases**: Automated creation with assets
+- **Conda-forge**: Bot-based recipe updates for conda ecosystem
+
+### Community Management
+
+- **Issue Templates**: Bug reports, feature requests, questions
+- **Discussion Forums**: GitHub Discussions for community interaction
+- **Good First Issues**: Well-labeled entry points for new contributors
+- **Mentorship**: Pairing experienced contributors with newcomers
+- **Hacktoberfest**: Annual participation with quality label management
+- **Conference Talks**: Present at PyCon, SciPy, and domain conferences
+
+## 8. Library Ecosystem & Dependencies
+
+### Core Dependencies (Minimal & Justified)
+
+- **pandas**: DataFrame manipulation (version compatibility: >=1.3.0)
+- **numpy**: Numerical computations (align with pandas requirements)
+- **plotly**: Interactive visualizations (primary visualization engine)
+- **msgpack**: Primary binary serialization format
+- **pydantic**: Configuration validation and settings management
+- **typing-extensions**: Backport of newer typing features
+
+### Optional Dependencies (Feature Groups)
+
+- **Export Extras**: `pip install eda-analyzer[export]`
+  - **weasyprint**: PDF generation from HTML
+  - **kaleido**: Static image export for Plotly
+- **JSON Support**: `pip install eda-analyzer[json]`
+  - **orjson**: High-performance JSON fallback serialization
+- **Compression**: `pip install eda-analyzer[compression]`
+  - **lz4**: Ultra-fast compression for MessagePack streams
+  - **zstd**: High-ratio compression for storage optimization
+- **Statistics Extras**: `pip install eda-analyzer[stats]`
+  - **scipy**: Advanced statistical computations
+  - **statsmodels**: Statistical modeling and tests
+- **Text Analysis**: `pip install eda-analyzer[text]`
+  - **wordcloud**: Text visualization
+  - **textstat**: Text readability metrics
+- **Performance**: `pip install eda-analyzer[performance]`
+  - **polars**: High-performance DataFrame alternative
+  - **numba**: JIT compilation for numerical functions
+- **Cloud Storage**: `pip install eda-analyzer[cloud]`
+  - **boto3**: AWS S3 integration
+  - **azure-storage-blob**: Azure Blob Storage
+  - **google-cloud-storage**: Google Cloud Storage
+
+### Development Dependencies
+
+- **Testing**: pytest, hypothesis, pytest-cov, pytest-xdist, pytest-benchmark
+- **Code Quality**: black, ruff, mypy, bandit, safety, pre-commit
+- **Documentation**: sphinx, sphinx-gallery, nbsphinx, myst-parser
+- **Build Tools**: build, twine, tox, nox
+- **Type Stubs**: pandas-stubs, types-requests
+- **JSON Testing**: jsonschema, deepdiff for JSON structure validation
+
+### Dependency Management Strategy
+
+- **Minimal Core**: Essential dependencies only for basic EDA functionality
+- **Optional Features**: Use extras_require for cloud storage, advanced compression
+- **Version Pinning**: Conservative lower bounds, test upper bounds regularly
+- **Security Updates**: Automated scanning with Dependabot/Safety
+- **Deprecation Policy**: 12-month notice for removing dependency support
+- **Alternative Backends**: Abstract interfaces for swappable JSON serializers
+
+### Cloud & Web Integration
+
+- **Storage Backends**: S3, Azure Blob, GCS with unified interface
+- **Dual Serialization**: MessagePack primary with JSON fallback
+- **Content Negotiation**: HTTP Accept header support (application/msgpack vs application/json)
+- **Compression**: Built-in MessagePack efficiency + optional lz4/zstd layers
+- **HTTP Integration**: Proper MIME types and CORS support for both formats
+- **CDN Optimization**: Binary and JSON files with intelligent caching strategies
+- **Browser Compatibility**: Automatic format detection with JavaScript msgpack libraries
+
+### PyData Ecosystem Integration
+
+- **Jupyter**: First-class notebook support with rich display
+- **Pandas**: Native DataFrame support with extension types
+- **Polars**: Alternative high-performance backend
+- **Dask**: Lazy evaluation for large datasets
+- **Vaex**: Out-of-core DataFrame processing
+- **Streamlit/Dash**: Easy integration for web applications
+- **Altair/Bokeh**: Alternative visualization backends
+
+## 9. Security & Privacy
+
+### Open Source Security Standards
+
+- **OSSF Best Practices**: Follow Open Source Security Foundation guidelines
+- **Security.md**: Clear vulnerability disclosure and response process
+- **Supply Chain Security**: Signed releases, dependency scanning, SBOM generation
+- **CVE Monitoring**: Automated scanning for known vulnerabilities in dependencies
+- **Security Advisories**: GitHub Security Advisories for coordinated disclosure
+- **SLSA Compliance**: Supply-chain Levels for Software Artifacts framework
+
+### Data Security & Privacy
+
+- **Privacy by Design**: No data persistence without explicit user consent
+- **Data Minimization**: Process only necessary data for analysis
+- **Secure Defaults**: Safe configurations that don't expose sensitive information
+- **Memory Safety**: Clear sensitive data from memory after processing
+- **No Network**: No external network requests without explicit user permission
+- **Audit Logging**: Optional logging of data processing operations
+
+### Input Validation & Sanitization
+
+- **Schema Validation**: Pydantic models for all configuration and input data
+- **Path Traversal Protection**: Secure file path handling for exports
+- **Injection Prevention**: Sanitize all user inputs in templates and exports
+- **File Type Validation**: Strict validation of uploaded/imported files
+- **Memory Limits**: Configurable limits to prevent resource exhaustion
+- **Error Sanitization**: Never expose internal paths or system information
+
+### Export Security
+
+- **Safe Templating**: Jinja2 with autoescaping enabled by default
+- **File Permission Checks**: Validate write permissions before export
+- **Content Type Validation**: Ensure exported content matches expected format
+- **No Code Execution**: Templates cannot execute arbitrary code
+- **Path Sanitization**: Prevent writing outside designated directories
+
+### Compliance & Governance
+
+- **GDPR Compliance**: Right to deletion, data portability, processing transparency
+- **Privacy Policy**: Clear data handling practices and user rights
+- **Terms of Service**: Open source license compliance and usage terms
+- **Accessibility**: WCAG 2.1 AA compliance for generated visualizations
+- **Internationalization**: Unicode support and localization-ready architecture
+
+## 10. Community & Sustainability
+
+### Open Source Community Building
+
+- **Inclusive Community**: Welcome contributors of all skill levels and backgrounds
+- **Clear Communication**: Public roadmaps, regular updates, transparent decisions
+- **Mentorship Programs**: Pair newcomers with experienced contributors
+- **Recognition Systems**: All-contributors for diverse contribution types
+- **Events & Outreach**: Conference presentations, workshops, and community talks
+- **Partnership**: Collaborate with related projects and organizations
+
+### Governance & Sustainability
+
+- **Governance Model**: Clear decision-making process with community input
+- **Maintainer Succession**: Bus factor >1 with clear onboarding process
+- **Financial Sustainability**: Sponsorship options, grants, and funding transparency
+- **License Strategy**: OSI-approved license (MIT/Apache 2.0) with clear attribution
+- **Trademark Policy**: Protect project name while allowing fair use
+- **Code of Conduct**: Enforced community standards with clear escalation process
+
+### Long-term Viability
+
+- **Architecture Documentation**: Clear system design for future maintainers
+- **Knowledge Transfer**: Regular maintainer meetings and documentation
+- **Succession Planning**: Training and mentoring future core contributors
+- **Financial Planning**: Sustainable funding model for infrastructure and development
+- **Community Health**: Regular surveys and feedback collection
+- **Ecosystem Integration**: Strong relationships with PyData stack maintainers
+
+### Extension & Plugin Ecosystem
+
+- **Plugin Architecture**: Well-documented interfaces for third-party extensions
+- **Plugin Registry**: Centralized discovery and installation of community plugins
+- **Extension Guidelines**: Best practices and templates for plugin development
+- **API Stability Guarantees**: Semantic versioning for plugin compatibility
+- **Community Showcase**: Gallery of community-built extensions and use cases
+- **Developer Experience**: Easy plugin development with scaffolding tools
+
+### Success Metrics & KPIs
+
+- **Adoption Metrics**: Download counts, GitHub stars, community size
+- **Quality Metrics**: Issue resolution time, test coverage, documentation completeness
+- **Community Health**: Contributor diversity, retention rates, satisfaction surveys
+- **Performance Benchmarks**: Speed and memory usage compared to alternatives
+- **Ecosystem Integration**: Number of dependent projects and integrations
+- **User Satisfaction**: Regular user surveys and feedback collection
+
+Remember: Build for the long term with community sustainability in mind. Every technical decision should consider maintainability, contributor onboarding, and ecosystem compatibility. Success is measured not just by adoption, but by community health and project longevity.
